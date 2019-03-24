@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.brianmj.room_test.db.AppDatabase
 import com.brianmj.room_test.db.DB
+import com.brianmj.room_test.model.TodoItem
 import com.brianmj.room_test.model.TodoViewModel
 import com.brianmj.room_test.view.add.AddTodoActivity
 import com.brianmj.room_test.view.common.getViewModel
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         with(recyclerViewTodos)
         {
-            adapter = RecyclerListAdapter(mutableListOf())
+            adapter = RecyclerListAdapter(mutableListOf(), onRecyclerItemClick())
 
             layoutManager = LinearLayoutManager(this@MainActivity)
             itemAnimator = DefaultItemAnimator()
@@ -71,11 +72,10 @@ class MainActivity : AppCompatActivity() {
                 )
             )
 
-            GlobalScope.launch(Dispatchers.Main){
+            GlobalScope.launch(Dispatchers.Main) {
                 val todosLiveData = viewModel.getTodos()
                 todosLiveData.observe(this@MainActivity,
-                    Observer {
-                        todos ->
+                    Observer { todos ->
                         todos?.let {
                             val adapter = (recyclerViewTodos.adapter as RecyclerListAdapter)
                             adapter.setItems(it)
@@ -89,6 +89,12 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             val intent = Intent(this, AddTodoActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun onRecyclerItemClick(): (TodoItem) -> Unit = { todo ->
+        GlobalScope.launch(DB) {
+            viewModel.delete(todo)
         }
     }
 }

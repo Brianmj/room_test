@@ -10,7 +10,8 @@ import com.brianmj.room_test.model.TodoItem
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.todo_item.*
 
-class RecyclerListAdapter(private val items: MutableList<TodoItem>) : RecyclerView.Adapter<RecyclerListAdapter.ViewHolder>() {
+class RecyclerListAdapter(private val items: MutableList<TodoItem>,
+                          private val onItemCheckboxClicked: (TodoItem) -> Unit) : RecyclerView.Adapter<RecyclerListAdapter.ViewHolder>() {
 
     override fun getItemCount(): Int = items.size
 
@@ -30,12 +31,17 @@ class RecyclerListAdapter(private val items: MutableList<TodoItem>) : RecyclerVi
         this.items.addAll(items)
         notifyDataSetChanged()
     }
-    class ViewHolder(override val containerView: View) :
+
+    inner class ViewHolder(override val containerView: View) :
             RecyclerView.ViewHolder(containerView), LayoutContainer {
 
         fun bindItem(item: TodoItem){
             cbTodoDone.isChecked = false
             tvTodoTitle.text = item.title
+
+            cbTodoDone.setOnCheckedChangeListener{_, _ ->
+                onItemCheckboxClicked(item)
+            }
         }
     }
 }
